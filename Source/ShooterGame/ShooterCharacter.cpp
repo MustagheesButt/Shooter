@@ -75,42 +75,12 @@ void AShooterCharacter::FireWeapon()
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
 		}
 
-		FVector2D ViewportSize;
-		if (GEngine && GEngine->GameViewport)
+		FVector BeamEndPoint;
+		if (GetBeamEndLocation(SocketTransform.GetLocation(), BeamEndPoint))
 		{
-			GEngine->GameViewport->GetViewportSize(ViewportSize);
-		}
-
-		FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-		CrosshairLocation.Y -= 50.f;
-		FVector CrosshairWorldPosition;
-		FVector CrosshairWorldDirection;
-
-		bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
-			UGameplayStatics::GetPlayerController(this, 0),
-			CrosshairLocation,
-			CrosshairWorldPosition,
-			CrosshairWorldDirection
-		);
-
-		if (bScreenToWorld)
-		{
-			FHitResult HitResult;
-			const FVector Start{ CrosshairWorldPosition };
-			const FVector End{ CrosshairWorldPosition + CrosshairWorldDirection * 50'000.f };
-			FVector BeamEndPoint{ End };
-
-			// Trace outward from crosshair's world location
-			GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility);
-
-			if (HitResult.bBlockingHit)
+			if (ImpactParticles)
 			{
-				BeamEndPoint = HitResult.Location;
-
-				if (ImpactParticles)
-				{
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, HitResult.Location);
-				}
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, BeamEndPoint);
 			}
 
 			if (BeamParticles)
@@ -122,43 +92,63 @@ void AShooterCharacter::FireWeapon()
 				}
 			}
 		}
-
-		//FHitResult HitResult;
-		//const FVector Start{ SocketTransform.GetLocation() };
-		//const FQuat Rotation{ SocketTransform.GetRotation() };
-		//const FVector RotationAxis{ Rotation.GetAxisX() };
-		//const FVector End{ Start + RotationAxis * 50'000.f };
-
-		//FVector BeamEndPoint{ End };
-
-		//GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility);
-		//if (HitResult.bBlockingHit)
-		//{
-		//	/*DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.f);
-		//	DrawDebugPoint(GetWorld(), HitResult.Location, 5.f, FColor::Red, false, 5.f);*/
-		//	BeamEndPoint = HitResult.Location;
-
-		//	if (ImpactParticles)
-		//	{
-		//		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles, HitResult.Location);
-		//	}
-		//}
-
-		//if (BeamParticles)
-		//{
-		//	UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, SocketTransform);
-		//	if (Beam)
-		//	{
-		//		Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
-		//	}
-		//}
 	}
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HipFireMontage)
 	{
 		AnimInstance->Montage_Play(HipFireMontage);
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
 	}
+}
+
+bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation)
+{
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	CrosshairLocation.Y -= 50.f;
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+
+	if (bScreenToWorld)
+	{
+		FHitResult HitResult;
+		const FVector Start{ CrosshairWorldPosition };
+		const FVector End{ CrosshairWorldPosition + CrosshairWorldDirection * 50'000.f };
+		OutBeamLocation = End;
+
+		// Trace outward from crosshair's world location
+		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility);
+
+		if (HitResult.bBlockingHit)
+		{
+			OutBeamLocation = HitResult.Location;
+		}
+
+		// Perform another line trace from the gun barrel
+		FHitResult FromBarrelHitResult;
+		GetWorld()->LineTraceSingleByChannel(FromBarrelHitResult, MuzzleSocketLocation, OutBeamLocation, ECollisionChannel::ECC_Visibility);
+		if (FromBarrelHitResult.bBlockingHit)
+		{
+			OutBeamLocation = FromBarrelHitResult.Location;
+		}
+		
+		return true;
+	}
+
+	return false;
 }
 
 // Called every frame
