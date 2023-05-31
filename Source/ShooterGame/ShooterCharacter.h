@@ -42,6 +42,8 @@ protected:
 
 	void AimButtonReleased();
 
+	void CameraInterpZoom(float DeltaTime);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -84,8 +86,10 @@ private:
 	bool bIsAiming;
 
 	float CameraDefaultFOV;
-
 	float CameraZoomedFOV;
+	float CameraCurrentFOV;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float ZoomInterpSpeed;
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return this->CameraBoom; };

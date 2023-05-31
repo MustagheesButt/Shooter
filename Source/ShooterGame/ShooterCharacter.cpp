@@ -17,16 +17,18 @@ AShooterCharacter::AShooterCharacter() :
 	BaseLookUpRate(45.f),
 	bIsAiming(false),
 	CameraDefaultFOV(0.f), // Actually set in BeginPlay
-	CameraZoomedFOV(60.f)
+	CameraZoomedFOV(35.f),
+	ZoomInterpSpeed(20.f),
+	CameraCurrentFOV(0.f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.f;
+	CameraBoom->TargetArmLength = 180.f;
 	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->SocketOffset = FVector(0.f, 50.f, 50.f);
+	CameraBoom->SocketOffset = FVector(0.f, 50.f, 70.f);
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -52,6 +54,7 @@ void AShooterCharacter::BeginPlay()
 	if (FollowCamera)
 	{
 		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
+		CameraCurrentFOV = CameraDefaultFOV;
 	}
 }
 
@@ -161,13 +164,26 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 void AShooterCharacter::AimButtonPressed()
 {
 	bIsAiming = true;
-	GetFollowCamera()->SetFieldOfView(CameraZoomedFOV);
+	//GetFollowCamera()->SetFieldOfView(CameraZoomedFOV);
 }
 
 void AShooterCharacter::AimButtonReleased()
 {
 	bIsAiming = false;
-	GetFollowCamera()->SetFieldOfView(CameraDefaultFOV);
+	//GetFollowCamera()->SetFieldOfView(CameraDefaultFOV);
+}
+
+void AShooterCharacter::CameraInterpZoom(float DeltaTime)
+{
+	if (bIsAiming)
+	{
+		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraZoomedFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	else
+	{
+		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraDefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	GetFollowCamera()->SetFieldOfView(CameraCurrentFOV);
 }
 
 // Called every frame
@@ -175,6 +191,7 @@ void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	CameraInterpZoom(DeltaTime);
 }
 
 // Called to bind functionality to input
