@@ -96,4 +96,5 @@ public:
 
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return this->FollowCamera; };
 
+	FORCEINLINE bool GetIsAiming() const { return this->bIsAiming; };
 };
