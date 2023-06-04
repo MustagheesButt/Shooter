@@ -35,7 +35,11 @@ AShooterCharacter::AShooterCharacter() :
 
 	// Crosshair spread factors
 	ShootTimeDuration(0.05f),
-	bFiringBullet(false)
+	bFiringBullet(false),
+
+	AutomaticFireRate(0.1f),
+	bCanFire(true),
+	bIsFireButtonPressed(false)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -303,6 +307,36 @@ void AShooterCharacter::FinishCrosshairBulletFire()
 	bFiringBullet = false;
 }
 
+void AShooterCharacter::FireButtonPressed()
+{
+	bIsFireButtonPressed = true;
+	StartFireTimer();
+}
+
+void AShooterCharacter::FireButtonReleased()
+{
+	bIsFireButtonPressed = false;
+}
+
+void AShooterCharacter::StartFireTimer()
+{
+	if (bCanFire)
+	{
+		FireWeapon();
+		bCanFire = false;
+		GetWorldTimerManager().SetTimer(AutoFireTimer, this, &AShooterCharacter::AutoFireReset, AutomaticFireRate);
+	}
+}
+
+void AShooterCharacter::AutoFireReset()
+{
+	bCanFire = true;
+	if (bIsFireButtonPressed)
+	{
+		StartFireTimer();
+	}
+}
+
 // Called to bind functionality to input
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -320,7 +354,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireWeapon);
+	PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AShooterCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction("FireButton", IE_Released, this, &AShooterCharacter::FireButtonReleased);
 
 	PlayerInputComponent->BindAction("AimButton", IE_Pressed, this, &AShooterCharacter::AimButtonPressed);
 	PlayerInputComponent->BindAction("AimButton", IE_Released, this, &AShooterCharacter::AimButtonReleased);
