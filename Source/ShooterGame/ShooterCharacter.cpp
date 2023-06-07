@@ -10,6 +10,8 @@
 #include "Engine/SkeletalMeshSocket.h"
 //#include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Item.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter() :
@@ -88,6 +90,17 @@ void AShooterCharacter::Tick(float DeltaTime)
 	SetLookRates();
 
 	CalculateCrosshairSpread(DeltaTime);
+
+	FHitResult ItemTraceResult;
+	TraceUnderCrosshair(ItemTraceResult);
+	if (ItemTraceResult.bBlockingHit)
+	{
+		AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
+		if (HitItem && HitItem->GetPickupWidget())
+		{
+			HitItem->GetPickupWidget()->SetVisibility(true);
+		}
+	}
 }
 
 void AShooterCharacter::TurnAtRate(float Rate)
@@ -210,6 +223,42 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 		}
 		
 		return true;
+	}
+
+	return false;
+}
+
+bool AShooterCharacter::TraceUnderCrosshair(FHitResult& OutHitResult)
+{
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	CrosshairLocation.Y -= 50.f;
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+
+	if (bScreenToWorld)
+	{
+		const FVector Start{ CrosshairWorldPosition };
+		const FVector End{ CrosshairWorldPosition + CrosshairWorldDirection * 50'000.f };
+
+		GetWorld()->LineTraceSingleByChannel(OutHitResult, Start, End, ECollisionChannel::ECC_Visibility);
+
+		if (OutHitResult.bBlockingHit)
+		{
+			return true;
+		}
 	}
 
 	return false;

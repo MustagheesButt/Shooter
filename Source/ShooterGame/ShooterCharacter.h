@@ -46,6 +46,8 @@ protected:
 
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
 
+	bool TraceUnderCrosshair(FHitResult& OutHitResult);
+
 	void AimButtonPressed();
 
 	void AimButtonReleased();
