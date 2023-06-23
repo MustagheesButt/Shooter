@@ -46,7 +46,7 @@ protected:
 
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
 
-	bool TraceUnderCrosshair(FHitResult& OutHitResult);
+	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
 
 	void AimButtonPressed();
 
@@ -68,6 +68,8 @@ protected:
 
 	void StartFireTimer();
 	void AutoFireReset();
+
+	void TraceForItems();
 
 public:	
 	// Called every frame
@@ -162,6 +164,12 @@ private:
 	// Sets timer between gunshots
 	FTimerHandle AutoFireTimer;
 
+	bool bShouldTraceForItems;
+	int8 OverlappedItemCount;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	class AItem* TraceHitItemLastFrame;
+
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return this->CameraBoom; };
 
@@ -171,4 +179,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	float GetCrosshairSpreadMultiplier() const;
+
+	FORCEINLINE int8 GetOverlappedItemCount() const { return this->OverlappedItemCount; };
+
+	void UpdateOverlappedItemCount(int8 Amount);
 };
