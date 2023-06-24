@@ -185,9 +185,9 @@ bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, 
 
 		// Perform another line trace from the gun barrel
 		FHitResult FromBarrelHitResult;
-		FVector StartToEnd{MuzzleSocketLocation - OutBeamLocation};
-		FVector End{ MuzzleSocketLocation + StartToEnd };
-		GetWorld()->LineTraceSingleByChannel(FromBarrelHitResult, MuzzleSocketLocation, End, ECollisionChannel::ECC_Visibility);
+		FVector StartToEnd{ MuzzleSocketLocation };
+		FVector End{ OutBeamLocation };
+		GetWorld()->LineTraceSingleByChannel(FromBarrelHitResult, StartToEnd, End, ECollisionChannel::ECC_Visibility);
 		if (FromBarrelHitResult.bBlockingHit)
 		{
 			OutBeamLocation = FromBarrelHitResult.Location;
