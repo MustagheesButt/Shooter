@@ -12,6 +12,9 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Item.h"
+#include "Weapon.h"
+#include "Components/SphereComponent.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter() :
@@ -80,6 +83,9 @@ void AShooterCharacter::BeginPlay()
 		CameraDefaultFOV = GetFollowCamera()->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
+
+	// spawn and attach a default weapon
+	EquipWeapon(SpawnDefaultWeapon());
 }
 
 // Called every frame
@@ -460,5 +466,33 @@ void AShooterCharacter::TraceForItems()
 	{
 		TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
 		TraceHitItemLastFrame = nullptr;
+	}
+}
+
+AWeapon* AShooterCharacter::SpawnDefaultWeapon()
+{
+	if (DefaultWeaponClass)
+	{
+		return GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+	}
+
+	return nullptr;
+}
+
+void AShooterCharacter::EquipWeapon(AWeapon* WeaponToEquip)
+{
+	if (WeaponToEquip)
+	{
+		// ignore collisions
+		WeaponToEquip->GetAreaSphere()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		WeaponToEquip->GetCollisionBox()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+		const USkeletalMeshSocket* RightHandSocket = GetMesh()->GetSocketByName("RightHandSocket");
+		if (RightHandSocket)
+		{
+			RightHandSocket->AttachActor(WeaponToEquip, GetMesh());
+		}
+
+		EquippedWeapon = WeaponToEquip;
 	}
 }
