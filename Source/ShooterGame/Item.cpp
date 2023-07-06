@@ -43,6 +43,8 @@ void AItem::BeginPlay()
 	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AItem::OnSphereEndOverlap);
 
 	SetActiveStars();
+
+	SetItemState(ItemState);
 }
 
 void AItem::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -82,6 +84,45 @@ void AItem::SetActiveStars()
 			ActiveStars.Add(false);
 		}
 	}
+}
+
+void AItem::SetItemProperties(EItemState State)
+{
+	switch (State)
+	{
+	case EItemState::EIS_Pickup:
+		Mesh->SetSimulatePhysics(false);
+		Mesh->SetVisibility(true);
+		Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		break;
+
+	case EItemState::EIS_Equipped:
+		Mesh->SetSimulatePhysics(false);
+		Mesh->SetVisibility(true);
+		Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	}
+}
+
+void AItem::SetItemState(EItemState State)
+{
+	this->ItemState = State;
+	SetItemProperties(State);
 }
 
 // Called every frame
