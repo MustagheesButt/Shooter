@@ -101,6 +101,7 @@ private:
 	EItemState ItemState;
 
 public:
+	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere;  }
 	FORCEINLINE UBoxComponent* GetCollisionBox() const { return CollisionBox; }
