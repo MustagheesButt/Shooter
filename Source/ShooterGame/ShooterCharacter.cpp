@@ -505,6 +505,7 @@ void AShooterCharacter::DropWeapon()
 		EquippedWeapon->GetMesh()->DetachFromComponent(DetachmentTransformRules);
 
 		EquippedWeapon->SetItemState(EItemState::EIS_Falling);
+		EquippedWeapon->ThrowWeapon();
 	}
 }
 
