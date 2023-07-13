@@ -446,18 +446,18 @@ void AShooterCharacter::TraceForItems()
 		TraceUnderCrosshair(ItemTraceResult, HitLoc);
 		if (ItemTraceResult.bBlockingHit)
 		{
-			AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
-			if (TraceHitItemLastFrame && HitItem != TraceHitItemLastFrame)
+			TraceHitItem = Cast<AItem>(ItemTraceResult.GetActor());
+			if (TraceHitItemLastFrame && TraceHitItem != TraceHitItemLastFrame)
 			{
 				TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
 			}
 
-			if (HitItem && HitItem->GetPickupWidget())
+			if (TraceHitItem && TraceHitItem->GetPickupWidget())
 			{
-				HitItem->GetPickupWidget()->SetVisibility(true);
+				TraceHitItem->GetPickupWidget()->SetVisibility(true);
 			}
 
-			TraceHitItemLastFrame = HitItem;
+			TraceHitItemLastFrame = TraceHitItem;
 		}
 		/*else if (TraceHitItemLastFrame)
 		{
@@ -509,9 +509,21 @@ void AShooterCharacter::DropWeapon()
 	}
 }
 
-void AShooterCharacter::SelectButtonPressed()
+void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 {
 	DropWeapon();
+	EquipWeapon(WeaponToSwap);
+	TraceHitItem = nullptr;
+	TraceHitItemLastFrame = nullptr;
+}
+
+void AShooterCharacter::SelectButtonPressed()
+{
+	if (TraceHitItem)
+	{
+		auto TraceHitWeapon = Cast<AWeapon>(TraceHitItem);
+		SwapWeapon(TraceHitWeapon);
+	}
 }
 
 void AShooterCharacter::SelectButtonReleased()

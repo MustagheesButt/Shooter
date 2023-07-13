@@ -34,7 +34,7 @@ void AWeapon::ThrowWeapon()
 
 	float RandomRotation = FMath::FRandRange(20.f, 40.f);
 	ImpulseDir = ImpulseDir.RotateAngleAxis(RandomRotation, FVector(0.f, 0.f, 1.f));
-	ImpulseDir *= 20'000.f;
+	ImpulseDir *= 5000.f;
 
 	GetMesh()->AddImpulse(ImpulseDir);
 
