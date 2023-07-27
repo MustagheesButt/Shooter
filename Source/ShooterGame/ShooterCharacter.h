@@ -189,6 +189,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	AItem* TraceHitItem;
 
+	// Item distance from camera when playing pickup animation
+	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	float CameraInterpDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	float CameraInterpElevation;
+
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return this->CameraBoom; };
 
@@ -202,4 +209,8 @@ public:
 	FORCEINLINE int8 GetOverlappedItemCount() const { return this->OverlappedItemCount; };
 
 	void UpdateOverlappedItemCount(int8 Amount);
+
+	FVector GetCameraInterpLocation();
+
+	void GetPickupItem(AItem* Item);
 };

@@ -12,7 +12,13 @@ AItem::AItem():
 	ItemName(FString("Default")),
 	ItemCount(0),
 	ItemRarity(EItemRarity::EIR_Common),
-	ItemState(EItemState::EIS_Pickup)
+	ItemState(EItemState::EIS_Pickup),
+
+	// Item Interp variables
+	ZCurveTime(0.7),
+	ItemInterpStartLocation(FVector(0.f)),
+	CameraTargetLocation(FVector(0.f)),
+	bInterping(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -131,6 +137,30 @@ void AItem::SetItemProperties(EItemState State)
 
 		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	case EItemState::EIS_EquipInterping:
+		PickupWidget->SetVisibility(false);
+
+		Mesh->SetSimulatePhysics(false);
+		Mesh->SetEnableGravity(false);
+		Mesh->SetVisibility(true);
+		Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		CollisionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+	}
+}
+
+void AItem::FinishInterping()
+{
+	if (Character)
+	{
+		Character->GetPickupItem(this);
 	}
 }
 
@@ -147,3 +177,14 @@ void AItem::Tick(float DeltaTime)
 
 }
 
+void AItem::StartItemCurve(AShooterCharacter* Character)
+{
+	this->Character = Character;
+
+	ItemInterpStartLocation = GetActorLocation();
+	bInterping = true;
+
+	SetItemState(EItemState::EIS_EquipInterping);
+
+	GetWorldTimerManager().SetTimer(ItemInterpTimer, this, &AItem::FinishInterping, ZCurveTime);
+}

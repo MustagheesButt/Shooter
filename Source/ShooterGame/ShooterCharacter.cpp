@@ -46,7 +46,10 @@ AShooterCharacter::AShooterCharacter() :
 	bCanFire(true),
 	bIsFireButtonPressed(false),
 
-	bShouldTraceForItems(false)
+	bShouldTraceForItems(false),
+
+	CameraInterpDistance(5.0f),
+	CameraInterpElevation(5.0f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -529,4 +532,22 @@ void AShooterCharacter::SelectButtonPressed()
 void AShooterCharacter::SelectButtonReleased()
 {
 
+}
+
+FVector AShooterCharacter::GetCameraInterpLocation()
+{
+	FVector CameraWorldLocation{ FollowCamera->GetComponentLocation() };
+	FVector CameraForwardVector{ FollowCamera->GetForwardVector() };
+
+	// Desired = CamLoc + CamForw * A + CamUp * B;
+	return CameraWorldLocation + CameraForwardVector * CameraInterpDistance + FVector(0.f, 0.f, CameraInterpElevation);
+}
+
+void AShooterCharacter::GetPickupItem(AItem* Item)
+{
+	auto Weapon = Cast<AWeapon>(Item);
+	if (Weapon)
+	{
+		SwapWeapon(Weapon);
+	}
 }
