@@ -125,6 +125,16 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	class AShooterCharacter* Character;
 
+	// To hold values while interping
+	float ItemInterpX;
+	float ItemInterpY;
+
+	float InterpInitialYawOffset;
+
+	// Used to scale item when interping
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ItemScaleCurve;
+
 public:
 	FORCEINLINE USkeletalMeshComponent* GetMesh() const { return Mesh; }
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
