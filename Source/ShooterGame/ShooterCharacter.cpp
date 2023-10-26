@@ -49,7 +49,10 @@ AShooterCharacter::AShooterCharacter() :
 	bShouldTraceForItems(false),
 
 	CameraInterpDistance(5.0f),
-	CameraInterpElevation(5.0f)
+	CameraInterpElevation(5.0f),
+
+	Starting9mmAmmo(60),
+	StartingARAmmo(120)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -89,6 +92,8 @@ void AShooterCharacter::BeginPlay()
 
 	// spawn and attach a default weapon
 	EquipWeapon(SpawnDefaultWeapon());
+
+	InitializeAmmoMap();
 }
 
 // Called every frame
@@ -531,6 +536,12 @@ void AShooterCharacter::SelectButtonPressed()
 void AShooterCharacter::SelectButtonReleased()
 {
 
+}
+
+void AShooterCharacter::InitializeAmmoMap()
+{
+	AmmoMap.Add(EAmmoType::EAT_9mm, Starting9mmAmmo);
+	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
 }
 
 FVector AShooterCharacter::GetCameraInterpLocation()

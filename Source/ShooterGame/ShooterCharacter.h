@@ -6,6 +6,15 @@
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EAmmoType : uint8
+{
+	EAT_9mm UMETA(DisplayName = "9mm"),
+	EAT_AR UMETA(DisplayName = "Assault Rifle"),
+
+	EAT_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
 UCLASS()
 class SHOOTERGAME_API AShooterCharacter : public ACharacter
 {
@@ -80,6 +89,8 @@ protected:
 	void SelectButtonPressed();
 	void SelectButtonReleased();
 
+	void InitializeAmmoMap();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -149,19 +160,19 @@ private:
 	float ZoomInterpSpeed;
 	
 	/** Crosshair config */
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
 	float CrosshairSpreadMultiplier;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
 	float CrosshairVelocityFactor;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
 	float CrosshairInAirFactor;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
 	float CrosshairAimFactor;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
 	float CrosshairShootingFactor;
 	float ShootTimeDuration;
 	bool bFiringBullet;
@@ -176,7 +187,7 @@ private:
 	bool bShouldTraceForItems;
 	int8 OverlappedItemCount;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	class AItem* TraceHitItemLastFrame;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
@@ -190,11 +201,20 @@ private:
 	AItem* TraceHitItem;
 
 	// Item distance from camera when playing pickup animation
-	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	float CameraInterpDistance;
 
-	UPROPERTY(EditAnywhere, BlueprintReadonly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	float CameraInterpElevation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	TMap<EAmmoType, int32> AmmoMap;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (AllowPrivateAccess = "true"))
+	int32 Starting9mmAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (AllowPrivateAccess = "true"))
+	int32 StartingARAmmo;
 
 public:
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return this->CameraBoom; };
