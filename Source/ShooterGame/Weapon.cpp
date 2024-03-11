@@ -42,6 +42,14 @@ void AWeapon::ThrowWeapon()
 	GetWorldTimerManager().SetTimer(ThrowWeaponTimer, this, &AWeapon::StopFalling, ThrowWeaponTime);
 }
 
+void AWeapon::DecrementAmmo()
+{
+	if (Ammo > 0)
+	{
+		Ammo--;
+	}
+}
+
 void AWeapon::StopFalling()
 {
 	bFalling = false;

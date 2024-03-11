@@ -184,6 +184,11 @@ void AShooterCharacter::FireWeapon()
 	}
 
 	StartCrosshairBulletFire();
+
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->DecrementAmmo();
+	}
 }
 
 bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation)
@@ -345,8 +350,11 @@ void AShooterCharacter::FinishCrosshairBulletFire()
 
 void AShooterCharacter::FireButtonPressed()
 {
-	bIsFireButtonPressed = true;
-	StartFireTimer();
+	if (WeaponHasAmmo())
+	{
+		bIsFireButtonPressed = true;
+		StartFireTimer();
+	}
 }
 
 void AShooterCharacter::FireButtonReleased()
@@ -366,10 +374,13 @@ void AShooterCharacter::StartFireTimer()
 
 void AShooterCharacter::AutoFireReset()
 {
-	bCanFire = true;
-	if (bIsFireButtonPressed)
+	if (WeaponHasAmmo())
 	{
-		StartFireTimer();
+		bCanFire = true;
+		if (bIsFireButtonPressed)
+		{
+			StartFireTimer();
+		}
 	}
 }
 
@@ -542,6 +553,13 @@ void AShooterCharacter::InitializeAmmoMap()
 {
 	AmmoMap.Add(EAmmoType::EAT_9mm, Starting9mmAmmo);
 	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
+}
+
+bool AShooterCharacter::WeaponHasAmmo()
+{
+	if (EquippedWeapon == nullptr) return false;
+
+	return EquippedWeapon->GetAmmo() > 0;
 }
 
 FVector AShooterCharacter::GetCameraInterpLocation()

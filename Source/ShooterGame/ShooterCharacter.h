@@ -91,6 +91,8 @@ protected:
 
 	void InitializeAmmoMap();
 
+	bool WeaponHasAmmo();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
